@@ -1,0 +1,344 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 50%, #90caf9 100%);
+    min-height: 100vh;
+    color: #1a237e;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header Styles */
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px 0;
+}
+
+.device-info {
+    font-size: 0.8rem;
+    color: #9e9e9e;
+    margin-bottom: 10px;
+    font-weight: 300;
+}
+
+header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a237e;
+    margin: 0;
+}
+
+/* Current Time Display */
+.current-time {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.time-display {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(31, 38, 135, 0.1);
+    display: inline-block;
+}
+
+#current-time {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1a237e;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.time-label {
+    font-size: 0.8rem;
+    color: #5c6bc0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Route Container */
+.route-container {
+    position: relative;
+    margin-bottom: 30px;
+    padding: 0 20px;
+}
+
+.route-line {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #1976d2;
+    transform: translateX(-50%);
+    z-index: 1;
+}
+
+/* Station Items */
+.station-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 25px;
+    z-index: 2;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.station-item:hover {
+    transform: translateY(-2px);
+}
+
+.station-item.active {
+    transform: scale(1.02);
+}
+
+.station-item.active .station-info {
+    background: rgba(227, 242, 253, 0.95);
+    border: 2px solid #1976d2;
+    box-shadow: 0 4px 20px rgba(31, 38, 135, 0.2);
+}
+
+.station-item.active .station-dot {
+    background: #1976d2;
+    transform: scale(1.2);
+}
+
+.station-dot {
+    width: 12px;
+    height: 12px;
+    background: #424242;
+    border-radius: 50%;
+    margin-right: 20px;
+    flex-shrink: 0;
+    z-index: 3;
+    transition: all 0.3s ease;
+}
+
+.station-info {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(31, 38, 135, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+    margin-bottom: 0;
+}
+
+.station-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1a237e;
+}
+
+.next-arrival {
+    font-size: 0.9rem;
+    color: #1976d2;
+    font-weight: 500;
+    padding: 4px 12px;
+    background: #e3f2fd;
+    border-radius: 20px;
+}
+
+/* Special styling for all stations departure countdown */
+.next-arrival::before {
+    content: "Abfahrt ";
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+/* Departure Times Under Station */
+.departure-times-station {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 0 0 12px 12px;
+    padding: 15px;
+    margin-top: 0px;
+    box-shadow: 0 2px 10px rgba(31, 38, 135, 0.1);
+    border-top: 2px solid #e3f2fd;
+    animation: slideDown 0.3s ease-out;
+}
+
+.departure-times-station h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1a237e;
+    margin-bottom: 10px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.departure-times-station .time-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.departure-times-station .time-item {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1a237e;
+    text-align: center;
+    padding: 8px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    border-left: 3px solid #1976d2;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Departure Times */
+.departure-times {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 20px rgba(31, 38, 135, 0.1);
+}
+
+.departure-times h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1a237e;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.time-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.time-item {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1a237e;
+    text-align: center;
+    padding: 8px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    border-left: 3px solid #1976d2;
+}
+
+/* Schedule Info */
+.schedule-info {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 20px rgba(31, 38, 135, 0.1);
+}
+
+.schedule-info h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1a237e;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.schedule-details {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.schedule-section {
+    text-align: center;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 10px;
+    border-left: 3px solid #1976d2;
+}
+
+.schedule-section h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1a237e;
+    margin-bottom: 8px;
+}
+
+.schedule-section p {
+    font-size: 0.8rem;
+    color: #5c6bc0;
+    line-height: 1.4;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 20px;
+    color: #5c6bc0;
+    font-size: 0.8rem;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .container {
+        padding: 15px;
+    }
+    
+    header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .station-info {
+        padding: 12px 15px;
+    }
+    
+    .station-name {
+        font-size: 1rem;
+    }
+    
+    .next-arrival {
+        font-size: 0.8rem;
+    }
+}
+
+/* Animation for updates */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.next-arrival.updated {
+    animation: pulse 0.5s ease-in-out;
+}
+
+/* Special styling for Reventlou (main station) */
+#reventlou .station-info {
+    background: rgba(227, 242, 253, 0.95);
+    border: 1px solid #1976d2;
+}
+
+#reventlou .station-name {
+    color: #1565c0;
+}
