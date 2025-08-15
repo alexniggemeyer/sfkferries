@@ -88,6 +88,8 @@ header h1 {
 
 /* Station Items */
 .station-item {
+    background-color: white;
+    border-radius: 12px;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -107,26 +109,10 @@ header h1 {
 }
 
 .station-item.active .station-info {
-    background: rgba(227, 242, 253, 0.95);
+    background: rgba(227, 242, 253, 1);
     border: 2px solid #1976d2;
-    box-shadow: 0 4px 20px rgba(31, 38, 135, 0.2);
 }
 
-.station-item.active .station-dot {
-    background: #1976d2;
-    transform: scale(1.2);
-}
-
-.station-dot {
-    width: 12px;
-    height: 12px;
-    background: #424242;
-    border-radius: 50%;
-    margin-right: 20px;
-    flex-shrink: 0;
-    z-index: 3;
-    transition: all 0.3s ease;
-}
 
 .station-info {
     width: 100%;
@@ -166,12 +152,10 @@ header h1 {
 /* Departure Times Under Station */
 .departure-times-station {
     width: 100%;
-    background: rgba(255, 255, 255, 0.95);
+
     border-radius: 0 0 12px 12px;
     padding: 15px;
-    margin-top: 0px;
     box-shadow: 0 2px 10px rgba(31, 38, 135, 0.1);
-    border-top: 2px solid #e3f2fd;
     animation: slideDown 0.3s ease-out;
 }
 
@@ -189,6 +173,7 @@ header h1 {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    margin-bottom: 20px;
 }
 
 .departure-times-station .time-item {
@@ -200,6 +185,92 @@ header h1 {
     background: #f5f5f5;
     border-radius: 8px;
     border-left: 3px solid #1976d2;
+}
+
+/* All Departures Container */
+.all-departures-container {
+    padding-top: 15px;
+}
+
+.all-departures-container h5 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #5c6bc0;
+    margin-bottom: 12px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Departures Scrollwheel */
+.departures-scrollwheel {
+    max-height: 150px; /* Height for exactly 3 departure items */
+    overflow-y: auto;
+    background: white;
+    border-radius: 8px;
+    padding: 2px;
+}
+
+/* Hide scrollbar but keep scrolling functionality */
+.departures-scrollwheel::-webkit-scrollbar {
+    width: 0px;
+    display: none;
+}
+
+.departures-scrollwheel {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+/* Individual departure time item */
+.departure-time-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 4px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #1976d2;
+    font-size: 0.9rem;
+    color: #1a237e;
+    transition: all 0.2s ease;
+}
+
+.departure-time-item:hover {
+    background: #e3f2fd;
+    transform: translateX(2px);
+}
+
+.departure-time-item:last-child {
+    margin-bottom: 0;
+}
+
+.departure-time-item .time {
+    font-weight: 600;
+    color: #1976d2;
+}
+
+.departure-time-item .countdown {
+    font-size: 0.8rem;
+    color: #5c6bc0;
+    background: #f5f5f5;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.departure-time-item.past {
+    opacity: 0.5;
+    background: #f5f5f5;
+}
+
+.departure-time-item.past .time {
+    color: #9e9e9e;
+}
+
+.departure-time-item.past .countdown {
+    color: #9e9e9e;
+    background: #e0e0e0;
 }
 
 @keyframes slideDown {
@@ -273,9 +344,9 @@ header h1 {
 .schedule-section {
     text-align: center;
     padding: 15px;
-    background: #f5f5f5;
+    background: #fcfcfc;
     border-radius: 10px;
-    border-left: 3px solid #1976d2;
+    border: 1px solid #1976d2;
 }
 
 .schedule-section h4 {

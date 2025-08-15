@@ -102,17 +102,10 @@ function updateStationTimes(station, schedule) {
 function updateDepartureTimesForStation(station, schedule) {
     if (!schedule) {
         // No service today
-        const departureElements = [
-            document.getElementById(`${station}-departure-1`),
-            document.getElementById(`${station}-departure-2`),
-            document.getElementById(`${station}-departure-3`)
-        ];
-        
-        departureElements.forEach((element, index) => {
-            if (element) {
-                element.textContent = index === 0 ? 'Kein Betrieb' : '';
-            }
-        });
+        const allDeparturesElement = document.getElementById(`${station}-all-departures`);
+        if (allDeparturesElement) {
+            allDeparturesElement.innerHTML = '<div class="departure-time-item">Kein Betrieb heute</div>';
+        }
         return;
     }
     
@@ -121,37 +114,52 @@ function updateDepartureTimesForStation(station, schedule) {
     
     // Get departure times for the station
     const departureTimes = schedule[station].departures;
-    let nextDepartures = [];
+    let allUpcomingDepartures = [];
     
+    // Find all upcoming departures today
     for (let time of departureTimes) {
         const timeMinutes = timeToMinutes(time);
         if (timeMinutes > currentMinutes) {
-            nextDepartures.push(timeMinutes);
-            if (nextDepartures.length >= 3) break;
+            allUpcomingDepartures.push(timeMinutes);
         }
     }
     
-    // If we don't have 3 departures today, add from tomorrow
-    if (nextDepartures.length < 3) {
-        for (let time of departureTimes) {
-            const timeMinutes = timeToMinutes(time);
-            nextDepartures.push(timeMinutes);
-            if (nextDepartures.length >= 3) break;
-        }
+    // Add tomorrow's first departure if no more today
+    if (allUpcomingDepartures.length < 5) {
+        const firstTomorrow = timeToMinutes(departureTimes[0]);
+        allUpcomingDepartures.push(firstTomorrow);
     }
     
-    // Update departure time displays
-    const departureElements = [
-        document.getElementById(`${station}-departure-1`),
-        document.getElementById(`${station}-departure-2`),
-        document.getElementById(`${station}-departure-3`)
-    ];
+    // Update the scrollable departures list
+    updateAllDeparturesList(station, allUpcomingDepartures, currentMinutes);
+}
+
+function updateAllDeparturesList(station, upcomingDepartures, currentMinutes) {
+    const allDeparturesElement = document.getElementById(`${station}-all-departures`);
+    if (!allDeparturesElement) return;
     
-    nextDepartures.slice(0, 3).forEach((time, index) => {
-        if (departureElements[index]) {
-            departureElements[index].textContent = minutesToTime(time);
-        }
+    if (upcomingDepartures.length === 0) {
+        allDeparturesElement.innerHTML = '<div class="departure-time-item">Keine weiteren Abfahrten heute</div>';
+        return;
+    }
+    
+    let departuresHTML = '';
+    
+    upcomingDepartures.forEach((departureTime) => {
+        const countdown = calculateCountdown(departureTime, currentMinutes);
+        const timeString = minutesToTime(departureTime);
+        const isTomorrow = departureTime < currentMinutes;
+        const itemClass = isTomorrow ? 'departure-time-item tomorrow' : 'departure-time-item';
+        
+        departuresHTML += `
+            <div class="${itemClass}">
+                <span class="time">${timeString}</span>
+                <span class="countdown">${countdown}${isTomorrow ? ' (morgen)' : ''}</span>
+            </div>
+        `;
     });
+    
+    allDeparturesElement.innerHTML = departuresHTML;
 }
 
 function updateAllStations() {

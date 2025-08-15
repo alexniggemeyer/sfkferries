@@ -22,7 +22,6 @@ class FerryRouteGenerator {
             <body>
                 <div class="container">
                     <header>
-                        <div class="device-info">iPhone 13 mini - 3</div>
                         <h1>${this.routeData.name}</h1>
                     </header>
 
@@ -80,10 +79,8 @@ class FerryRouteGenerator {
                 </div>
                 <div class="departure-times-station" id="${station.id}-departures" style="display: none;">
                     <h4>Nächste Abfahrten</h4>
-                    <div class="time-list">
-                        <div class="time-item" id="${station.id}-departure-1">--:--</div>
-                        <div class="time-item" id="${station.id}-departure-2">--:--</div>
-                        <div class="time-item" id="${station.id}-departure-3">--:--</div>
+                    <div class="departures-scrollwheel" id="${station.id}-all-departures">
+                        <!-- 3 departures will be visible at a time -->
                     </div>
                 </div>
             </div>
