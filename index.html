@@ -35,9 +35,18 @@
             <p id="footer-text">SFK F2 - Fahrplan-Website</p>
         </footer>
     </div>
-
+    <script src="script.js"></script>
     <script src="route-generator.js"></script>
     <script src="sfk-f2-route.js"></script>
-    <script src="script.js"></script>
+    <script src="kiel-laboe-route.js"></script>
+    <script src="laboe-kiel-route.js"></script>
+    <script src="routes-manager.js"></script>
+    <script>
+        // Initialize routes manager when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            window.routesManager = new RoutesManager();
+            window.routesManager.init();
+        });
+    </script>
 </body>
 </html>

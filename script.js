@@ -17,16 +17,70 @@ function minutesToTime(minutes) {
     return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
 }
 
+function isInOperation(dayOfWeek) {
+    switch (dayOfWeek) {
+        case 0:
+            return window.ferrySchedule.InOperation.sunday;
+        case 6:
+            return window.ferrySchedule.InOperation.saturday;
+        default:
+    }
+    return window.ferrySchedule.InOperation.weekday;
+}
+
 function getCurrentDaySchedule() {
     const now = new Date();
     const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-    
+
+    if (!window.ferrySchedule || !isInOperation(dayOfWeek)) {
+        return null;
+    }
+
+    const schedule = {};
+
     if (dayOfWeek === 0) {
-        return null; // No service on Sunday
+        // Sunday
+        Object.keys(window.ferrySchedule).forEach(stationId => {
+            const station = window.ferrySchedule[stationId];
+            if (station.sundayDepartures) {
+                schedule[stationId] = {
+                    departures: station.sundayDepartures,
+                    arrivals: station.sundayArrivals || station.sundayDepartures,
+                    name: station.name
+                };
+            } else if (station.saturdayDepartures) {
+                schedule[stationId] = {
+                    departures: station.saturdayDepartures,
+                    arrivals: station.saturdayArrivals || station.saturdayDepartures,
+                    name: station.name
+                };
+            }
+        });
+        return schedule;
     } else if (dayOfWeek === 6) {
-        return window.ferrySchedule ? window.ferrySchedule.saturday : null;
+        // Saturday
+        Object.keys(window.ferrySchedule).forEach(stationId => {
+            const station = window.ferrySchedule[stationId];
+            if (station.saturdayDepartures) {
+                schedule[stationId] = {
+                    departures: station.saturdayDepartures,
+                    arrivals: station.saturdayArrivals || station.saturdayDepartures,
+                    name: station.name
+                };
+            }
+        });
+        return schedule;
     } else {
-        return window.ferrySchedule ? window.ferrySchedule.weekdays : null;
+        // Weekdays
+        Object.keys(window.ferrySchedule).forEach(stationId => {
+            const station = window.ferrySchedule[stationId];
+            schedule[stationId] = {
+                departures: station.departures,
+                arrivals: station.arrivals || station.departures,
+                name: station.name
+            };
+        });
+        return schedule;
     }
 }
 
@@ -38,19 +92,19 @@ function findNextTime(times, currentMinutes) {
             return timeMinutes;
         }
     }
-    
+
     // If no more times today, return the first time tomorrow
     return timeToMinutes(times[0]);
 }
 
 function calculateCountdown(nextTimeMinutes, currentMinutes) {
     let diff = nextTimeMinutes - currentMinutes;
-    
+
     if (diff < 0) {
         // Next time is tomorrow
         diff += 24 * 60;
     }
-    
+
     if (diff < 60) {
         return `in ${diff}min`;
     } else {
@@ -81,17 +135,17 @@ function updateStationTimes(station, schedule) {
         document.getElementById(`${station}-arrival`).textContent = 'Kein Betrieb';
         return;
     }
-    
+
     const now = new Date();
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
-    
+
     // For all stations, show departure time countdown
     const nextTime = findNextTime(schedule[station].departures, currentMinutes);
     const countdownText = calculateCountdown(nextTime, currentMinutes);
-    
+
     // Update arrival display (keeping the ID for consistency)
     const arrivalElement = document.getElementById(`${station}-arrival`);
-    
+
     if (arrivalElement.textContent !== countdownText) {
         arrivalElement.textContent = countdownText;
         arrivalElement.classList.add('updated');
@@ -108,14 +162,14 @@ function updateDepartureTimesForStation(station, schedule) {
         }
         return;
     }
-    
+
     const now = new Date();
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
-    
+
     // Get departure times for the station
     const departureTimes = schedule[station].departures;
     let allUpcomingDepartures = [];
-    
+
     // Find all upcoming departures today
     for (let time of departureTimes) {
         const timeMinutes = timeToMinutes(time);
@@ -123,34 +177,36 @@ function updateDepartureTimesForStation(station, schedule) {
             allUpcomingDepartures.push(timeMinutes);
         }
     }
-    
+
     // Add tomorrow's first departure if no more today
     if (allUpcomingDepartures.length < 5) {
         const firstTomorrow = timeToMinutes(departureTimes[0]);
         allUpcomingDepartures.push(firstTomorrow);
     }
-    
+
     // Update the scrollable departures list
+    console.log(schedule[station].departures)
+    console.log(allUpcomingDepartures)
     updateAllDeparturesList(station, allUpcomingDepartures, currentMinutes);
 }
 
 function updateAllDeparturesList(station, upcomingDepartures, currentMinutes) {
     const allDeparturesElement = document.getElementById(`${station}-all-departures`);
     if (!allDeparturesElement) return;
-    
+
     if (upcomingDepartures.length === 0) {
         allDeparturesElement.innerHTML = '<div class="departure-time-item">Keine weiteren Abfahrten heute</div>';
         return;
     }
-    
+
     let departuresHTML = '';
-    
+
     upcomingDepartures.forEach((departureTime) => {
         const countdown = calculateCountdown(departureTime, currentMinutes);
         const timeString = minutesToTime(departureTime);
         const isTomorrow = departureTime < currentMinutes;
         const itemClass = isTomorrow ? 'departure-time-item tomorrow' : 'departure-time-item';
-        
+
         departuresHTML += `
             <div class="${itemClass}">
                 <span class="time">${timeString}</span>
@@ -158,20 +214,20 @@ function updateAllDeparturesList(station, upcomingDepartures, currentMinutes) {
             </div>
         `;
     });
-    
+
     allDeparturesElement.innerHTML = departuresHTML;
 }
 
 function updateAllStations() {
     const schedule = getCurrentDaySchedule();
-    
+
     // Get all station IDs from the generated HTML
     const stationItems = document.querySelectorAll('.station-item');
     stationItems.forEach(stationItem => {
         const stationId = stationItem.id;
         updateStationTimes(stationId, schedule);
     });
-    
+
     // Update departure times for selected station if any
     if (selectedStation) {
         updateDepartureTimesForStation(selectedStation, schedule);
@@ -183,30 +239,30 @@ function selectStation(station) {
     document.querySelectorAll('.departure-times-station').forEach(section => {
         section.style.display = 'none';
     });
-    
+
     // Remove active state from all stations
     document.querySelectorAll('.station-item').forEach(item => {
         item.classList.remove('active');
     });
-    
+
     // If clicking the same station, deselect it
     if (selectedStation === station) {
         selectedStation = null;
         return;
     }
-    
+
     // Add active state to selected station
     document.getElementById(station).classList.add('active');
-    
+
     // Show departure times for selected station
     const departureSection = document.getElementById(`${station}-departures`);
     if (departureSection) {
         departureSection.style.display = 'block';
     }
-    
+
     // Update selected station
     selectedStation = station;
-    
+
     // Update the departure times display
     const schedule = getCurrentDaySchedule();
     updateDepartureTimesForStation(station, schedule);
@@ -219,41 +275,75 @@ function initializeApp() {
         setTimeout(initializeApp, 100);
         return;
     }
-    
+    console.log("called initializeApp");
     // Update times immediately
     updateCurrentTime();
     updateAllStations();
-    
+
     // Update every minute
     setInterval(() => {
         updateCurrentTime();
         updateAllStations();
     }, 60000);
-    
+
     // Update current time every second for smooth display
     setInterval(updateCurrentTime, 1000);
 }
 
-// Initialize the app when the page loads
-document.addEventListener('DOMContentLoaded', function() {
-    // Wait a bit for the route generation to complete
-    setTimeout(initializeApp, 200);
+// Function to initialize main script functionality (called when routes are switched)
+function initializeMainScript() {
+    // Re-add click event listeners to stations
+    const stations = document.querySelectorAll('.station-item');
+    stations.forEach(station => {
+        station.addEventListener('click', function () {
+            const stationId = this.id;
+            const schedule = window.ferrySchedule;
+
+            // Hide all departure sections first
+            document.querySelectorAll('.departure-times-station').forEach(section => {
+                section.style.display = 'none';
+            });
+
+            // Remove active class from all stations
+            document.querySelectorAll('.station-item').forEach(s => {
+                s.classList.remove('active');
+            });
+
+            // Add active class to clicked station
+            this.classList.add('active');
+
+            // Show departure times for this station
+            const departureSection = document.getElementById(`${stationId}-departures`);
+            if (departureSection) {
+                departureSection.style.display = 'block';
+                const currentSchedule = getCurrentDaySchedule();
+                updateDepartureTimesForStation(stationId, currentSchedule);
+            }
+        });
+    });
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function () {
+    // Initial setup will be handled by routes manager
+    // This function will be called when routes are switched
 });
 
 // Add some interactive features
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Wait for stations to be generated before adding event listeners
     setTimeout(() => {
         // Add click effects to station items
         const stationItems = document.querySelectorAll('.station-item');
         stationItems.forEach(item => {
-            item.addEventListener('click', function() {
+            item.addEventListener('click', function () {
                 // Get the station ID from the element
                 const stationId = this.id;
-                
+
                 // Select the station
+                console.log("selectStation Event")
                 selectStation(stationId);
-                
+
                 // Add click animation
                 this.style.transform = 'scale(0.98)';
                 setTimeout(() => {
@@ -261,16 +351,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 150);
             });
         });
-        
+
         // Add hover effects for better UX
         stationItems.forEach(item => {
-            item.addEventListener('mouseenter', function() {
+            item.addEventListener('mouseenter', function () {
                 if (!this.classList.contains('active')) {
                     this.style.transform = 'translateY(-2px)';
                 }
             });
-            
-            item.addEventListener('mouseleave', function() {
+
+            item.addEventListener('mouseleave', function () {
                 if (!this.classList.contains('active')) {
                     this.style.transform = '';
                 }

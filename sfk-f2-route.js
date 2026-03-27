@@ -2,67 +2,45 @@
 // Schwentine-Fährlinie F2
 
 const sfkF2Route = {
-    name: "SFK F2",
-    description: "Schwentine-Fährlinie F2",
+    name: "F2",
+    description: "Schwentine",
+    InOperation:
+    {
+        "weekday": true,
+        "saturday": true,
+        "sunday": true,
+        "publicHolidays": true
+    },
     stations: [
         {
             id: "reventlou",
             name: "Reventlou",
             isMain: true,
-            weekdayDepartures: [5.23, 5.53, 6.23, 6.53, 7.08, 7.23, 7.38, 7.53, 8.08, 8.23, 8.38, 8.53, 9.08, 9.38, 10.38, 11.08, 11.38, 12.08, 12.38, 13.08, 14.08, 14.23, 14.38, 14.53, 15.08, 15.23, 15.38, 15.53, 16.21, 16.53, 17.23, 17.53, 18.23, 18.53, 19.38, 20.08, 20.38, 21.08, 21.38],
-            weekdayArrivals: [5.21, 5.51, 6.21, 6.51, 7.21, 7.36, 7.51, 8.06, 8.21, 8.36, 8.51, 9.06, 9.21, 9.36, 10.06, 11.06, 11.36, 12.06, 12.36, 13.06, 13.36, 14.36, 14.51, 15.06, 15.21, 15.36, 15.51, 16.06, 16.21, 16.53, 17.21, 17.51, 18.21, 18.51, 19.21, 20.06, 20.36, 21.06, 21.36, 22.06],
+            weekdayDepartures: [5.23, 5.53, 6.23, 6.53, 7.23, 7.38, 7.51, 8.08, 8.23, 8.38, 8.53, 9.08, 9.38, 10.38, 11.08, 11.38, 12.08, 12.38, 13.08, 14.08, 14.23, 14.38, 14.53, 15.08, 15.23, 15.38, 15.53, 16.21, 16.53, 17.23, 17.53, 18.23, 18.53, 19.38, 20.08, 20.38, 21.08, 21.38],
+            weekdayArrivals: [5.21, 5.51, 6.21, 6.51, 7.21, 7.52, 8.06, 8.21, 8.36, 8.51, 9.06, 9.21, 9.36, 10.06, 11.06, 11.36, 12.06, 12.36, 13.06, 13.36, 14.36, 14.51, 15.06, 15.21, 15.36, 15.51, 16.06, 16.21, 16.53, 17.21, 17.51, 18.21, 18.51, 19.21, 20.06, 20.36, 21.06, 21.36, 22.06],
             saturdayDepartures: [8.30, 9.00, 9.30, 10.00, 10.30, 11.00, 11.30, 12.30, 13.00, 13.30, 14.00, 14.30, 15.00, 15.30, 16.15],
-            saturdayArrivals: [8.58, 9.28, 9.58, 10.28, 10.58, 11.28, 11.58, 12.58, 13.28, 13.58, 14.28, 14.58, 15.28, 15.58, 16.43]
+            saturdayArrivals: [8.58, 9.28, 9.58, 10.28, 10.58, 11.28, 11.58, 12.58, 13.28, 13.58, 14.28, 14.58, 15.28, 15.58, 16.43],
+            sundayDepartures: [9.30, 10.00, 10.30, 11.00, 11.30, 12.00, 12.30, 13.30, 14.00, 14.30, 15.00, 15.30, 16.00, 16.30],
+            sundayArrivals: [9.58, 10.28, 10.58, 11.28, 11.58, 12.28, 12.58, 13.58, 14.28, 14.58, 15.28, 15.58, 16.28, 16.58]
         },
         {
             id: "dietrichsdorf",
             name: "Dietrichsdorf",
-            weekdayDepartures: [5.03, 5.33, 6.03, 6.33, 7.03, 7.18, 7.33, 7.48, 8.03, 8.18, 8.33, 8.48, 9.03, 9.18, 9.48, 10.48, 11.18, 11.48, 12.18, 12.48, 13.18, 14.18, 14.33, 14.48, 15.03, 15.18, 15.33, 15.48, 16.03, 16.31, 17.03, 17.33, 18.03, 18.33, 19.03, 19.48, 20.18, 20.48, 21.18, 21.48],
-            saturdayDepartures: [8.40, 9.10, 9.40, 10.10, 10.40, 11.10, 11.40, 12.40, 13.10, 13.40, 14.10, 14.40, 15.10, 15.40, 16.25]
+            weekdayDepartures: [5.03, 5.33, 6.03, 6.33, 7.03, 7.33, 7.48, 8.03, 8.18, 8.33, 8.48, 9.03, 9.18, 9.48, 10.48, 11.18, 11.48, 12.18, 12.48, 13.18, 14.18, 14.33, 14.48, 15.03, 15.18, 15.33, 15.48, 16.03, 16.31, 17.03, 17.33, 18.03, 18.33, 19.03, 19.48, 20.18, 20.48, 21.18, 21.48],
+            saturdayDepartures: [8.40, 9.10, 9.40, 10.10, 10.40, 11.10, 11.40, 12.40, 13.10, 13.40, 14.10, 14.40, 15.10, 15.40, 16.25],
+            sundayDepartures: [9.40, 10.10, 10.40, 11.10, 11.40, 12.10, 12.40, 13.40, 14.10, 14.40, 15.10, 15.40, 16.10, 16.40]
         },
         {
             id: "wellingdorf",
             name: "Wellingdorf",
-            weekdayDepartures: [5.09, 5.39, 6.09, 6.39, 7.09, 7.24, 7.39, 7.54, 8.09, 8.24, 8.39, 8.54, 9.09, 9.24, 9.54, 10.54, 11.24, 11.54, 12.24, 12.54, 13.24, 14.24, 14.39, 14.56, 15.09, 15.24, 15.39, 15.54, 16.09, 16.37, 17.09, 17.39, 18.09, 18.39, 19.09, 19.54, 20.24, 20.54, 21.24, 21.54],
-            saturdayDepartures: [8.46, 9.16, 9.46, 10.16, 10.46, 11.16, 11.46, 12.46, 13.16, 13.46, 14.16, 14.46, 15.16, 15.46, 16.31]
+            weekdayDepartures: [5.09, 5.39, 6.09, 6.39, 7.09, 7.39, 7.54, 8.09, 8.24, 8.39, 8.54, 9.09, 9.24, 9.54, 10.54, 11.24, 11.54, 12.24, 12.54, 13.24, 14.24, 14.39, 14.54, 15.09, 15.24, 15.39, 15.54, 16.09, 16.37, 17.09, 17.39, 18.09, 18.39, 19.09, 19.54, 20.24, 20.54, 21.24, 21.54],
+            saturdayDepartures: [8.46, 9.16, 9.46, 10.16, 10.46, 11.16, 11.46, 12.46, 13.16, 13.46, 14.16, 14.46, 15.16, 15.46, 16.31],
+            sundayDepartures: [9.46, 10.16, 10.46, 11.16, 11.46, 12.16, 12.46, 13.46, 14.16, 14.46, 15.16, 15.46, 16.16, 16.46]
         }
     ],
     scheduleInfo: {
-        "Montag - Freitag": "Früheste Abfahrt: 5:23 Uhr | Späteste Ankunft: 22:06 Uhr",
+        "Montag - Freitag": "Früheste Abfahrt: 5:03 Uhr | Späteste Ankunft: 22:06 Uhr",
         "Samstag": "Früheste Abfahrt: 8:30 Uhr | Späteste Ankunft: 16:43 Uhr",
-        "Sonntag": "Kein Fährbetrieb"
+        "Sonn- und Feiertage": "Früheste Abfahrt: 9:30 Uhr | Späteste Ankunft: 16:58 Uhr"
     }
 };
-
-// Initialize the route when the page loads
-document.addEventListener('DOMContentLoaded', function() {
-    // Create generator instance
-    const generator = new FerryRouteGenerator(sfkF2Route);
-    
-    // Generate and populate the route container
-    const routeContainer = document.getElementById('route-container');
-    if (routeContainer) {
-        routeContainer.innerHTML = generator.generateStationsHTML();
-    }
-    
-    // Generate and populate the schedule details
-    const scheduleDetails = document.getElementById('schedule-details');
-    if (scheduleDetails) {
-        scheduleDetails.innerHTML = generator.generateScheduleInfoHTML();
-    }
-    
-    // Update page title and footer
-    const routeName = document.getElementById('route-name');
-    const footerText = document.getElementById('footer-text');
-    
-    if (routeName) {
-        routeName.textContent = sfkF2Route.name;
-    }
-    
-    if (footerText) {
-        footerText.textContent = `${sfkF2Route.name} - Fahrplan-Website`;
-    }
-    
-    // Generate the JavaScript data structure for the main script
-    window.ferrySchedule = JSON.parse(generator.generateJavaScriptData().replace('const ferrySchedule = ', '').replace(';', ''));
-});

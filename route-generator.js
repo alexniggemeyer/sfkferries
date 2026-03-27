@@ -58,11 +58,11 @@ class FerryRouteGenerator {
     // Generate HTML for all stations
     generateStationsHTML() {
         let stationsHTML = '';
-        
+
         this.routeData.stations.forEach((station, index) => {
             stationsHTML += this.generateStationHTML(station, index);
         });
-        
+
         return stationsHTML;
     }
 
@@ -70,7 +70,7 @@ class FerryRouteGenerator {
     generateStationHTML(station, index) {
         const isMainStation = station.isMain || index === 0;
         const mainStationClass = isMainStation ? 'main-station' : '';
-        
+
         return `
             <div class="station-item ${mainStationClass}" id="${station.id}">
                 <div class="station-info">
@@ -90,7 +90,7 @@ class FerryRouteGenerator {
     // Generate schedule information
     generateScheduleInfoHTML() {
         let scheduleHTML = '';
-        
+
         Object.entries(this.routeData.scheduleInfo).forEach(([day, info]) => {
             scheduleHTML += `
                 <div class="schedule-section">
@@ -99,30 +99,67 @@ class FerryRouteGenerator {
                 </div>
             `;
         });
-        
+
         return scheduleHTML;
     }
 
     // Generate the JavaScript data structure
     generateJavaScriptData() {
-        const jsData = {
-            weekdays: {},
-            saturday: {}
-        };
+        let jsData = 'const ferrySchedule = {\n';
+
+        jsData += `    "InOperation": {\n`;
+        jsData += `        "weekday": ${this.routeData.InOperation.weekday},\n`;
+        jsData += `        "saturday": ${this.routeData.InOperation.saturday},\n`;
+        jsData += `        "sunday": ${this.routeData.InOperation.sunday},\n`;
+        jsData += `        "publicHolidays": ${this.routeData.InOperation.publicHolidays}\n`;
+        jsData += `    },\n`;
 
         this.routeData.stations.forEach(station => {
-            jsData.weekdays[station.id] = {
-                departures: station.weekdayDepartures,
-                arrivals: station.weekdayArrivals || station.weekdayDepartures
-            };
-            
-            jsData.saturday[station.id] = {
-                departures: station.saturdayDepartures,
-                arrivals: station.saturdayArrivals || station.saturdayDepartures
-            };
+            jsData += `    "${station.id}": {\n`;
+            jsData += `        "departures": [${station.weekdayDepartures.map(t => `"${t}"`).join(', ')}],\n`;
+
+            // Only add arrivals if they exist
+            if (station.weekdayArrivals && station.weekdayArrivals.length > 0) {
+                jsData += `        "arrivals": [${station.weekdayArrivals.map(t => `"${t}"`).join(', ')}],\n`;
+            } else {
+                jsData += `        "arrivals": [${station.weekdayDepartures.map(t => `"${t}"`).join(', ')}],\n`;
+            }
+
+            // Add Saturday departures if they exist
+            if (station.saturdayDepartures && station.saturdayDepartures.length > 0) {
+                jsData += `        "saturdayDepartures": [${station.saturdayDepartures.map(t => `"${t}"`).join(', ')}],\n`;
+            } else {
+                jsData += `        "saturdayDepartures": [${station.weekdayDepartures.map(t => `"${t}"`).join(', ')}],\n`;
+            }
+
+            // Add Saturday arrivals if they exist
+            if (station.saturdayArrivals && station.saturdayArrivals.length > 0) {
+                jsData += `        "saturdayArrivals": [${station.saturdayArrivals.map(t => `"${t}"`).join(', ')}],\n`;
+            } else {
+                jsData += `        "saturdayArrivals": [${station.saturdayDepartures && station.saturdayDepartures.length > 0 ? station.saturdayDepartures.map(t => `"${t}"`).join(', ') : station.weekdayDepartures.map(t => `"${t}"`).join(', ')}],\n`;
+            }
+
+            // Add Sunday departures if they exist
+            if (station.sundayDepartures && station.sundayDepartures.length > 0) {
+                jsData += `        "sundayDepartures": [${station.sundayDepartures.map(t => `"${t}"`).join(', ')}],\n`;
+            }
+
+            // Add Sunday arrivals if they exist
+            if (station.sundayArrivals && station.sundayArrivals.length > 0) {
+                jsData += `        "sundayArrivals": [${station.sundayArrivals.map(t => `"${t}"`).join(', ')}],\n`;
+            }
+
+            jsData += `        "name": "${station.name}"\n`;
+            jsData += `    }`;
+
+            if (this.routeData.stations.indexOf(station) < this.routeData.stations.length - 1) {
+                jsData += ',';
+            }
+            jsData += '\n';
         });
 
-        return `const ferrySchedule = ${JSON.stringify(jsData, null, 2)};`;
+        jsData += '};';
+        return jsData;
     }
 
     // Generate a complete route configuration file
