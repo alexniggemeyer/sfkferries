@@ -4,7 +4,8 @@ class RoutesManager {
         this.routes = {
             'sfk-f2': sfkF2Route,
             'kiel-laboe': kielLaboeRoute,
-            'laboe-kiel': laboeKielRoute
+            'laboe-kiel': laboeKielRoute,
+            'laboe-schilksee': laboeSchilkseeRoute
         };
         this.currentRoute = 'sfk-f2'; // Default route
         this.generator = null;
@@ -35,6 +36,10 @@ class RoutesManager {
                 <button class="route-tab ${this.currentRoute === 'laboe-kiel' ? 'active' : ''}" data-route="laboe-kiel">
                     <span class="route-name">Laboe → Kiel</span>
                     <span class="route-desc">Laboe nach Bahnhof</span>
+                </button>
+                <button class="route-tab ${this.currentRoute === 'laboe-schilksee' ? 'active' : ''}" data-route="laboe-schilksee">
+                    <span class="route-name">Laboe → Schilksee/Strande</span>
+                    <span class="route-desc">Laboe – Schilksee – Strande – Laboe</span>
                 </button>
             </div>
         `;

@@ -17,29 +17,80 @@ function minutesToTime(minutes) {
     return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
 }
 
-function isInOperation(dayOfWeek) {
-    switch (dayOfWeek) {
-        case 0:
-            return window.ferrySchedule.InOperation.sunday;
-        case 6:
-            return window.ferrySchedule.InOperation.saturday;
-        default:
+const publicHolidayCache = new Map();
+let holidayFetchStarted = false;
+
+function buildHolidayKey(date) {
+    return date.toISOString().slice(0, 10);
+}
+
+function isPublicHoliday(date) {
+    const key = buildHolidayKey(date);
+    return publicHolidayCache.has(key);
+}
+
+function getHolidayName(date) {
+    const key = buildHolidayKey(date);
+    return publicHolidayCache.get(key) || '';
+}
+
+async function fetchSchleswigHolsteinHolidays(year) {
+    const url = `https://date.nager.at/api/v3/PublicHolidays/${year}/DE`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        throw new Error(`Holiday API request failed for ${year}: ${response.status}`);
+    }
+
+    const holidays = await response.json();
+    holidays.forEach(holiday => {
+        const counties = holiday.counties || [];
+        if (!counties.length || counties.includes('DE-SH')) {
+            publicHolidayCache.set(holiday.date, holiday.localName || holiday.name);
+        }
+    });
+}
+
+async function loadSchleswigHolsteinHolidays(startYear, endYear) {
+    if (holidayFetchStarted) return;
+    holidayFetchStarted = true;
+
+    const fetchPromises = [];
+    for (let year = startYear; year <= endYear; year += 1) {
+        fetchPromises.push(fetchSchleswigHolsteinHolidays(year));
+    }
+
+    await Promise.all(fetchPromises);
+    updateAllStations();
+}
+
+function isInOperation(date) {
+    if (!window.ferrySchedule || !window.ferrySchedule.InOperation) return false;
+
+    const dayOfWeek = date.getDay();
+    if (dayOfWeek === 0) {
+        return window.ferrySchedule.InOperation.sunday;
+    }
+    if (dayOfWeek === 6) {
+        return window.ferrySchedule.InOperation.saturday;
+    }
+    if (isPublicHoliday(date)) {
+        return window.ferrySchedule.InOperation.publicHolidays;
     }
     return window.ferrySchedule.InOperation.weekday;
 }
 
-function getCurrentDaySchedule() {
-    const now = new Date();
-    const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-
-    if (!window.ferrySchedule || !isInOperation(dayOfWeek)) {
+function getScheduleForDate(date) {
+    if (!window.ferrySchedule || !isInOperation(date)) {
         return null;
     }
 
+    const dayOfWeek = date.getDay();
     const schedule = {};
+    const isHoliday = isPublicHoliday(date);
 
-    if (dayOfWeek === 0) {
-        // Sunday
+    if (isHoliday || dayOfWeek === 0) {
+        // Sunday or public holiday schedule
         Object.keys(window.ferrySchedule).forEach(stationId => {
             const station = window.ferrySchedule[stationId];
             if (station.sundayDepartures) {
@@ -84,7 +135,11 @@ function getCurrentDaySchedule() {
     }
 }
 
-function findNextTime(times, currentMinutes) {
+function getCurrentDaySchedule() {
+    return getScheduleForDate(new Date());
+}
+
+function findNextTime(times, currentMinutes, nextDayTimes) {
     // Find the next time today
     for (let time of times) {
         const timeMinutes = timeToMinutes(time);
@@ -93,8 +148,9 @@ function findNextTime(times, currentMinutes) {
         }
     }
 
-    // If no more times today, return the first time tomorrow
-    return timeToMinutes(times[0]);
+    // No more times today: use tomorrow's actual schedule (day-type may differ, e.g. weekday -> weekend)
+    const fallbackTimes = nextDayTimes && nextDayTimes.length ? nextDayTimes : times;
+    return timeToMinutes(fallbackTimes[0]);
 }
 
 function calculateCountdown(nextTimeMinutes, currentMinutes) {
@@ -126,7 +182,45 @@ function updateCurrentTime() {
         hour12: false
     });
     document.getElementById('current-time').textContent = timeString;
+    renderHolidayStatus(now);
     return now;
+}
+
+function renderHolidayStatus(date) {
+    const holidayName = getHolidayName(date);
+    let indicator = document.getElementById('holiday-indicator');
+    let scheduleIndicator = document.getElementById('holiday-schedule-indicator');
+    const timeDisplay = document.querySelector('.time-display');
+    const scheduleInfo = document.querySelector('.schedule-info');
+
+    if (!timeDisplay || !scheduleInfo) return;
+
+    if (!indicator) {
+        indicator = document.createElement('span');
+        indicator.id = 'holiday-indicator';
+        indicator.className = 'holiday-message';
+        timeDisplay.appendChild(indicator);
+    }
+
+    if (!scheduleIndicator) {
+        scheduleIndicator = document.createElement('div');
+        scheduleIndicator.id = 'holiday-schedule-indicator';
+        scheduleIndicator.className = 'holiday-banner';
+        scheduleInfo.insertBefore(scheduleIndicator, scheduleInfo.firstChild);
+    }
+
+    if (holidayName) {
+        const labelText = `Feiertag: ${holidayName}`;
+        indicator.textContent = labelText;
+        indicator.style.display = 'block';
+        scheduleIndicator.textContent = `${labelText} - Fahrplan gilt für Sonntag/Feiertag.`;
+        scheduleIndicator.style.display = 'block';
+    } else {
+        indicator.textContent = '';
+        indicator.style.display = 'none';
+        scheduleIndicator.textContent = '';
+        scheduleIndicator.style.display = 'none';
+    }
 }
 
 function updateStationTimes(station, schedule) {
@@ -139,8 +233,13 @@ function updateStationTimes(station, schedule) {
     const now = new Date();
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
+    const tomorrow = new Date(now);
+    tomorrow.setDate(now.getDate() + 1);
+    const tomorrowSchedule = getScheduleForDate(tomorrow);
+    const tomorrowTimes = tomorrowSchedule?.[station]?.departures || [];
+
     // For all stations, show departure time countdown
-    const nextTime = findNextTime(schedule[station].departures, currentMinutes);
+    const nextTime = findNextTime(schedule[station].departures, currentMinutes, tomorrowTimes);
     const countdownText = calculateCountdown(nextTime, currentMinutes);
 
     // Update arrival display (keeping the ID for consistency)
@@ -154,9 +253,8 @@ function updateStationTimes(station, schedule) {
 }
 
 function updateDepartureTimesForStation(station, schedule) {
+    const allDeparturesElement = document.getElementById(`${station}-all-departures`);
     if (!schedule) {
-        // No service today
-        const allDeparturesElement = document.getElementById(`${station}-all-departures`);
         if (allDeparturesElement) {
             allDeparturesElement.innerHTML = '<div class="departure-time-item">Kein Betrieb heute</div>';
         }
@@ -165,29 +263,31 @@ function updateDepartureTimesForStation(station, schedule) {
 
     const now = new Date();
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const upcomingDepartures = [];
 
-    // Get departure times for the station
-    const departureTimes = schedule[station].departures;
-    let allUpcomingDepartures = [];
-
-    // Find all upcoming departures today
-    for (let time of departureTimes) {
+    const todayTimes = schedule[station]?.departures || [];
+    todayTimes.forEach(time => {
         const timeMinutes = timeToMinutes(time);
         if (timeMinutes > currentMinutes) {
-            allUpcomingDepartures.push(timeMinutes);
+            upcomingDepartures.push({ minutes: timeMinutes, isTomorrow: false });
         }
+    });
+
+    const tomorrow = new Date(now);
+    tomorrow.setDate(now.getDate() + 1);
+    const tomorrowSchedule = getScheduleForDate(tomorrow);
+    const tomorrowTimes = tomorrowSchedule?.[station]?.departures || [];
+
+    tomorrowTimes.forEach(time => {
+        upcomingDepartures.push({ minutes: timeToMinutes(time), isTomorrow: true });
+    });
+
+    if (upcomingDepartures.length === 0 && allDeparturesElement) {
+        allDeparturesElement.innerHTML = '<div class="departure-time-item">Keine weiteren Abfahrten heute oder morgen</div>';
+        return;
     }
 
-    // Add tomorrow's first departure if no more today
-    if (allUpcomingDepartures.length < 5) {
-        const firstTomorrow = timeToMinutes(departureTimes[0]);
-        allUpcomingDepartures.push(firstTomorrow);
-    }
-
-    // Update the scrollable departures list
-    console.log(schedule[station].departures)
-    console.log(allUpcomingDepartures)
-    updateAllDeparturesList(station, allUpcomingDepartures, currentMinutes);
+    updateAllDeparturesList(station, upcomingDepartures, currentMinutes);
 }
 
 function updateAllDeparturesList(station, upcomingDepartures, currentMinutes) {
@@ -201,10 +301,11 @@ function updateAllDeparturesList(station, upcomingDepartures, currentMinutes) {
 
     let departuresHTML = '';
 
-    upcomingDepartures.forEach((departureTime) => {
+    upcomingDepartures.forEach((departureItem) => {
+        const departureTime = typeof departureItem === 'object' ? departureItem.minutes : departureItem;
+        const isTomorrow = typeof departureItem === 'object' ? departureItem.isTomorrow : departureTime < currentMinutes;
         const countdown = calculateCountdown(departureTime, currentMinutes);
         const timeString = minutesToTime(departureTime);
-        const isTomorrow = departureTime < currentMinutes;
         const itemClass = isTomorrow ? 'departure-time-item tomorrow' : 'departure-time-item';
 
         departuresHTML += `
@@ -276,6 +377,10 @@ function initializeApp() {
         return;
     }
     console.log("called initializeApp");
+
+    const now = new Date();
+    loadSchleswigHolsteinHolidays(now.getFullYear() - 1, now.getFullYear() + 2);
+
     // Update times immediately
     updateCurrentTime();
     updateAllStations();

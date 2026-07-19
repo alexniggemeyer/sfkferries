@@ -68,6 +68,24 @@ header h1 {
     letter-spacing: 1px;
 }
 
+.holiday-message {
+    display: none;
+    font-size: 0.85rem;
+    color: #1565c0;
+    margin-top: 6px;
+}
+
+.holiday-banner {
+    display: none;
+    background: rgba(255, 243, 224, 0.95);
+    color: #9c4300;
+    border: 1px solid #ffcc80;
+    padding: 12px 14px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
 /* Route Container */
 .route-container {
     position: relative;
@@ -360,6 +378,20 @@ header h1 {
     font-size: 0.8rem;
     color: #5c6bc0;
     line-height: 1.4;
+}
+
+.schedule-section.schedule-validity {
+    background: #fff8e1;
+    border-color: #ffb74d;
+}
+
+.schedule-section.schedule-validity h4 {
+    color: #ef6c00;
+}
+
+.schedule-section.schedule-validity p {
+    color: #795548;
+    font-weight: 600;
 }
 
 /* Footer */

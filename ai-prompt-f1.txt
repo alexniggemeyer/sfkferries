@@ -1,0 +1,21 @@
+I have OCR output from a ferry timetable for the F1 route. Parse the raw text below and return a JSON object with the exact station names and departure times in HH:MM format. Only include stations from this route and nothing else.
+
+Route stations:
+Bahnhof, Seegarten, Reventlou, Mönkeberg, Möltenort, Friedrichsort, Falkenstein, Laboe
+
+Raw text:
+Bahnhof Abhm       08:55  09:40  10:40  12:05  13:30  14:40  15:15  16:30  18:34
+Seegarten          09:02  09:47  10:47  12:12  13:37  14:47  15:22  16:37  18:41
+Reventlou          09:10  09:55  10:55  12:20  13:45  14:55  15:30  16:45  18:49
+Mönkeberg          09:22  10:07  11:07  12:32  13:57  15:07  15:42  16:57  19:01
+Möltenort          09:35  10:20  11:20  12:45  14:10  15:20  15:55  17:10  19:14
+Friedrichsort      09:44  11:29  12:54  14:19  15:29  16:04  17:19  19:23
+Falkenstein        09:56  10:41  11:41  13:06  14:31  15:41  16:16  19:35
+Laboe Ankunft      10:04  10:49  11:49  13:14  14:39  15:49  16:24  17:35  19:43
+
+
+Return valid JSON only, for example:
+{
+  "Bahnhof": ["08:55", "09:40"],
+  "Seegarten": ["09:02", "09:47"]
+}

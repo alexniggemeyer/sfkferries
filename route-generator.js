@@ -100,6 +100,30 @@ class FerryRouteGenerator {
             `;
         });
 
+        if (this.routeData.validity) {
+            const validity = this.routeData.validity;
+            const from = validity.from ? validity.from : null;
+            const to = validity.to ? validity.to : null;
+            let validityText = '';
+
+            if (from && to) {
+                validityText = `Gültig: ${from} – ${to}`;
+            } else if (from) {
+                validityText = `Gültig ab: ${from}`;
+            } else if (to) {
+                validityText = `Gültig bis: ${to}`;
+            }
+
+            if (validityText) {
+                scheduleHTML += `
+                    <div class="schedule-section schedule-validity">
+                        <h4>Gültigkeitszeitraum</h4>
+                        <p>${validityText}</p>
+                    </div>
+                `;
+            }
+        }
+
         return scheduleHTML;
     }
 
